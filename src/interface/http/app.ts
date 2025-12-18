@@ -21,9 +21,18 @@ export interface AppDependencies {
 export const createApp = (dependencies: AppDependencies): Application => {
   const app = express();
 
+  // CORS
+  app.use(
+    cors({
+      origin: true,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+    })
+  );
+
   // Security middleware
   app.use(helmet());
-  app.use(cors());
 
   // Compression
   app.use(compression());
