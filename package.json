@@ -19,7 +19,7 @@
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "migrate:create": "node-pg-migrate create",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "compression": "^1.7.4",
