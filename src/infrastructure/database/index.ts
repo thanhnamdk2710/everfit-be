@@ -1,6 +1,7 @@
-import { Pool, QueryResult, PoolConfig, QueryResultRow } from "pg";
-import { getConfig } from "../config";
-import { logger } from "../logger";
+import type { QueryResult, PoolConfig, QueryResultRow } from 'pg';
+import { Pool } from 'pg';
+import { getConfig } from '../config';
+import { logger } from '../logger';
 
 export class Database {
   private pool: Pool | null = null;
@@ -30,18 +31,18 @@ export class Database {
       const client = await this.pool.connect();
       logger.info(
         { host: config.host, database: config.database },
-        "Database connected successfully"
+        'Database connected successfully'
       );
       client.release();
     } catch (error) {
       const err = error as Error;
-      logger.error({ error: err.message }, "Database connection failed");
+      logger.error({ error: err.message }, 'Database connection failed');
       throw error;
     }
 
     // Handle pool errors
-    this.pool.on("error", (err: Error) => {
-      logger.error({ error: err.message }, "Unexpected database error");
+    this.pool.on('error', (err: Error) => {
+      logger.error({ error: err.message }, 'Unexpected database error');
     });
 
     return this.pool;
@@ -51,16 +52,13 @@ export class Database {
     if (this.pool) {
       await this.pool.end();
       this.pool = null;
-      logger.info("Database disconnected");
+      logger.info('Database disconnected');
     }
   }
 
-  async query<T extends QueryResultRow = any>(
-    text: string,
-    params?: any[]
-  ): Promise<QueryResult<T>> {
+  async query<T extends QueryResultRow>(text: string, params?: unknown[]): Promise<QueryResult<T>> {
     if (!this.pool) {
-      throw new Error("Database not connected");
+      throw new Error('Database not connected');
     }
 
     const start = Date.now();
@@ -74,7 +72,7 @@ export class Database {
           duration: `${duration}ms`,
           rows: result.rowCount,
         },
-        "Query executed"
+        'Query executed'
       );
 
       return result;
@@ -85,7 +83,7 @@ export class Database {
           query: text.substring(0, 100),
           error: err.message,
         },
-        "Query error"
+        'Query error'
       );
       throw error;
     }

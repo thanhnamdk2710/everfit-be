@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { MetricType, MetricRow } from '../../types';
+import type { MetricType, MetricRow } from '../../types';
 
 export interface MetricProps {
   id?: string;

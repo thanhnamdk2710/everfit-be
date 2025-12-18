@@ -1,5 +1,6 @@
-import { Metric, Unit, IMetricRepository } from "../../domain";
-import { CreateMetricDTO, MetricResponseDTO } from "../dto/MetricDTO";
+import type { IMetricRepository } from '../../domain';
+import { Metric, Unit } from '../../domain';
+import type { CreateMetricDTO, MetricResponseDTO } from '../dto/MetricDTO';
 
 export class CreateMetricUseCase {
   constructor(private readonly _metricRepo: IMetricRepository) {}
@@ -9,9 +10,7 @@ export class CreateMetricUseCase {
     if (!Unit.isValidUnit(dto.type, dto.unit)) {
       const validUnits = Unit.getValidUnits(dto.type);
       throw new Error(
-        `Invalid unit "${dto.unit}" for type "${
-          dto.type
-        }". Valid units: ${validUnits.join(", ")}`
+        `Invalid unit "${dto.unit}" for type "${dto.type}". Valid units: ${validUnits.join(', ')}`
       );
     }
 
@@ -43,7 +42,7 @@ export class CreateMetricUseCase {
       originalUnit: baseUnit,
       value: metric.value,
       unit: metric.unit,
-      date: metric.date.toISOString().split("T")[0],
+      date: metric.date.toISOString().split('T')[0],
       createdAt: metric.createdAt,
     };
   }

@@ -1,8 +1,9 @@
-import rateLimit from "express-rate-limit";
+import type { RateLimitRequestHandler } from 'express-rate-limit';
+import rateLimit from 'express-rate-limit';
 
-import { getConfig } from "../../../infrastructure/config";
+import { getConfig } from '../../../infrastructure/config';
 
-export const createRateLimiter = () => {
+export const createRateLimiter = (): RateLimitRequestHandler => {
   const config = getConfig();
 
   return rateLimit({
@@ -13,12 +14,12 @@ export const createRateLimiter = () => {
     message: {
       success: false,
       error: {
-        code: "RATE_LIMIT_EXCEEDED",
-        message: "Too many requests, please try again later.",
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many requests, please try again later.',
       },
     },
     // Use default keyGenerator which properly handles IPv6
-    skip: () => process.env.NODE_ENV === "test",
+    skip: () => process.env.NODE_ENV === 'test',
     validate: { xForwardedForHeader: false },
   });
 };

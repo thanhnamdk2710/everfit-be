@@ -1,9 +1,6 @@
-import { Metric, Unit, IMetricRepository } from "../../domain";
-import {
-  ListMetricsDTO,
-  MetricResponseDTO,
-  ListMetricsResponseDTO,
-} from "../dto/MetricDTO";
+import type { Metric, IMetricRepository } from '../../domain';
+import { Unit } from '../../domain';
+import type { ListMetricsDTO, MetricResponseDTO, ListMetricsResponseDTO } from '../dto/MetricDTO';
 
 export class ListMetricsUseCase {
   constructor(private readonly metricRepository: IMetricRepository) {}
@@ -13,9 +10,7 @@ export class ListMetricsUseCase {
     if (dto.unit && dto.type && !Unit.isValidUnit(dto.type, dto.unit)) {
       const validUnits = Unit.getValidUnits(dto.type);
       throw new Error(
-        `Invalid unit "${dto.unit}" for type "${
-          dto.type
-        }". Valid units: ${validUnits.join(", ")}`
+        `Invalid unit "${dto.unit}" for type "${dto.type}". Valid units: ${validUnits.join(', ')}`
       );
     }
 
@@ -29,15 +24,10 @@ export class ListMetricsUseCase {
     };
 
     // Fetch from repository
-    const { data: metrics, total } = await this.metricRepository.findByUserId(
-      dto.userId,
-      filters
-    );
+    const { data: metrics, total } = await this.metricRepository.findByUserId(dto.userId, filters);
 
     // Convert units if requested
-    const responseData = metrics.map((metric) =>
-      this.toResponseDTO(metric, dto.unit)
-    );
+    const responseData = metrics.map((metric) => this.toResponseDTO(metric, dto.unit));
 
     return {
       data: responseData,
@@ -50,18 +40,13 @@ export class ListMetricsUseCase {
     };
   }
 
-  private toResponseDTO(
-    metric: Metric,
-    targetUnit?: string
-  ): MetricResponseDTO {
+  private toResponseDTO(metric: Metric, targetUnit?: string): MetricResponseDTO {
     let convertedValue = metric.value;
     let unit = metric.unit;
 
     if (targetUnit && targetUnit !== metric.unit) {
       const targetUnitConverter = new Unit(metric.type, targetUnit);
-      convertedValue = parseFloat(
-        targetUnitConverter.fromBase(metric.baseValue).toFixed(4)
-      );
+      convertedValue = parseFloat(targetUnitConverter.fromBase(metric.baseValue).toFixed(4));
       unit = targetUnit;
     }
 
@@ -73,10 +58,7 @@ export class ListMetricsUseCase {
       originalUnit: unit,
       value: metric.value,
       unit: metric.unit,
-      date:
-        metric.date instanceof Date
-          ? metric.date.toISOString().split("T")[0]
-          : metric.date,
+      date: metric.date instanceof Date ? metric.date.toISOString().split('T')[0] : metric.date,
       createdAt: metric.createdAt,
     };
   }

@@ -1,50 +1,50 @@
-import {
+import type {
   MetricType,
   DistanceUnit,
   TemperatureUnit,
   UnitConfig,
   UnitConfigMap,
-} from "../../types";
+} from '../../types';
 
 const DISTANCE_UNITS: Record<DistanceUnit, UnitConfig> = {
   meter: {
     toBase: (v) => v,
     fromBase: (v) => v,
-    symbol: "m",
+    symbol: 'm',
   },
   centimeter: {
     toBase: (v) => v * 0.01,
     fromBase: (v) => v * 100,
-    symbol: "cm",
+    symbol: 'cm',
   },
   inch: {
     toBase: (v) => v * 0.0254,
     fromBase: (v) => v / 0.0254,
-    symbol: "in",
+    symbol: 'in',
   },
   feet: {
     toBase: (v) => v * 0.3048,
     fromBase: (v) => v / 0.3048,
-    symbol: "ft",
+    symbol: 'ft',
   },
   yard: {
     toBase: (v) => v * 0.9144,
     fromBase: (v) => v / 0.9144,
-    symbol: "yd",
+    symbol: 'yd',
   },
 };
 
 const TEMPERATURE_UNITS: Record<TemperatureUnit, UnitConfig> = {
-  kelvin: { toBase: (v) => v, fromBase: (v) => v, symbol: "K" },
+  kelvin: { toBase: (v) => v, fromBase: (v) => v, symbol: 'K' },
   celsius: {
     toBase: (v) => v + 273.15,
     fromBase: (v) => v - 273.15,
-    symbol: "°C",
+    symbol: '°C',
   },
   fahrenheit: {
     toBase: (v) => (v - 32) * (5 / 9) + 273.15,
     fromBase: (v) => (v - 273.15) * (9 / 5) + 32,
-    symbol: "°F",
+    symbol: '°F',
   },
 };
 
@@ -68,12 +68,10 @@ export class Unit {
 
   private validate(): void {
     if (!UNIT_CONFIGS[this.type]) {
-      throw new Error(
-        `Invalid metric type: ${this.type}. Must be "distance" or "temperature"`
-      );
+      throw new Error(`Invalid metric type: ${this.type}. Must be "distance" or "temperature"`);
     }
     if (!UNIT_CONFIGS[this.type][this.unit]) {
-      const validUnits = Object.keys(UNIT_CONFIGS[this.type]).join(", ");
+      const validUnits = Object.keys(UNIT_CONFIGS[this.type]).join(', ');
       throw new Error(
         `Invalid unit "${this.unit}" for type "${this.type}". Valid units: ${validUnits}`
       );
@@ -89,7 +87,7 @@ export class Unit {
   }
 
   getBaseUnit(type: MetricType): string {
-    return type === "distance" ? "meter" : "kelvin";
+    return type === 'distance' ? 'meter' : 'kelvin';
   }
 
   static getValidUnits(type: string): string[] {

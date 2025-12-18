@@ -1,31 +1,42 @@
-import pino from "pino";
+import pino from 'pino';
 
-const isDevelopment = process.env.NODE_ENV === "development";
-const isTest = process.env.NODE_ENV === "test";
+const isDevelopment = process.env.NODE_ENV === 'development';
+const isTest = process.env.NODE_ENV === 'test';
+
+function getTransport(): pino.TransportSingleOptions | undefined {
+  if (!isDevelopment) {
+    return undefined;
+  }
+
+  try {
+    require.resolve('pino-pretty');
+    return {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:standard',
+        ignore: 'pid,hostname',
+      },
+    };
+  } catch {
+    return undefined;
+  }
+}
 
 export const logger = pino({
-  level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
+  level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
   enabled: !isTest,
-  transport: isDevelopment
-    ? {
-        target: "pino-pretty",
-        options: {
-          colorize: true,
-          translateTime: "SYS:standard",
-          ignore: "pid,hostname",
-        },
-      }
-    : undefined,
+  transport: getTransport(),
   formatters: {
     level: (label) => ({ level: label }),
   },
   base: {
-    service: "metrics-api",
-    version: process.env.npm_package_version || "1.0.0",
+    service: 'metrics-api',
+    version: process.env.npm_package_version || '1.0.0',
   },
 });
 
-export const createChildLogger = (context: Record<string, unknown>) => {
+export const createChildLogger = (context: Record<string, unknown>): Logger => {
   return logger.child(context);
 };
 

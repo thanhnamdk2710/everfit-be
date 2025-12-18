@@ -1,14 +1,14 @@
-import request from "supertest";
+import request from 'supertest';
 
-import { createApp } from "../../src/interface/http/app";
-import { MetricController } from "../../src/interface/http/controllers/MetricController";
+import { createApp } from '../../src/interface/http/app';
+import { MetricController } from '../../src/interface/http/controllers/MetricController';
 import {
   CreateMetricUseCase,
   GetChartDataUseCase,
   ListMetricsUseCase,
-} from "../../src/application";
-import { IMetricRepository, Metric } from "../../src/domain";
-import { MetricFilters, MetricType } from "../../src/types";
+} from '../../src/application';
+import type { IMetricRepository, Metric } from '../../src/domain';
+import type { MetricFilters, MetricType } from '../../src/types';
 
 class InMemoryMetricRepository implements IMetricRepository {
   private metrics: Metric[] = [];
@@ -66,7 +66,7 @@ class InMemoryMetricRepository implements IMetricRepository {
 
     const map = new Map<string, Metric>();
     for (const metric of filtered) {
-      const key = metric.date.toISOString().split("T")[0];
+      const key = metric.date.toISOString().split('T')[0];
       const existing = map.get(key);
       if (!existing) {
         map.set(key, metric);
@@ -77,18 +77,16 @@ class InMemoryMetricRepository implements IMetricRepository {
       }
     }
 
-    return Array.from(map.values()).sort(
-      (a, b) => a.date.getTime() - b.date.getTime()
-    );
+    return Array.from(map.values()).sort((a, b) => a.date.getTime() - b.date.getTime());
   }
 }
 
-describe("HTTP integration: metrics routes", () => {
+describe('HTTP integration: metrics routes', () => {
   beforeAll(() => {
-    process.env.NODE_ENV = "test";
+    process.env.NODE_ENV = 'test';
   });
 
-  test("GET /health", async () => {
+  test('GET /health', async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
@@ -98,12 +96,12 @@ describe("HTTP integration: metrics routes", () => {
 
     const app = createApp({ metricController });
 
-    const res = await request(app).get("/health");
+    const res = await request(app).get('/health');
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe("healthy");
+    expect(res.body.status).toBe('healthy');
   });
 
-  test("GET api", async () => {
+  test('GET api', async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
@@ -113,14 +111,14 @@ describe("HTTP integration: metrics routes", () => {
 
     const app = createApp({ metricController });
 
-    const res = await request(app).get("/api");
+    const res = await request(app).get('/api');
     expect(res.status).toBe(200);
-    expect(res.body.name).toBe("Metrics API");
-    expect(res.body.supportedUnits.distance).toContain("meter");
-    expect(res.body.supportedUnits.temperature).toContain("celsius");
+    expect(res.body.name).toBe('Metrics API');
+    expect(res.body.supportedUnits.distance).toContain('meter');
+    expect(res.body.supportedUnits.temperature).toContain('celsius');
   });
 
-  test("POST /v1/api/metrics - validation error", async () => {
+  test('POST /v1/api/metrics - validation error', async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
@@ -130,15 +128,15 @@ describe("HTTP integration: metrics routes", () => {
 
     const app = createApp({ metricController });
 
-    const res = await request(app).post("/v1/api/metrics").send({});
+    const res = await request(app).post('/v1/api/metrics').send({});
 
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
-    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
     expect(Array.isArray(res.body.error.details)).toBe(true);
   });
 
-  test("POST /v1/api/metrics", async () => {
+  test('POST /v1/api/metrics', async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
@@ -148,21 +146,21 @@ describe("HTTP integration: metrics routes", () => {
 
     const app = createApp({ metricController });
 
-    const createRes = await request(app).post("/v1/api/metrics").send({
-      userId: "550e8400-e29b-41d4-a716-446655440001",
-      type: "distance",
+    const createRes = await request(app).post('/v1/api/metrics').send({
+      userId: '550e8400-e29b-41d4-a716-446655440001',
+      type: 'distance',
       value: 100,
-      unit: "centimeter",
-      date: "2025-12-01",
+      unit: 'centimeter',
+      date: '2025-12-01',
     });
 
     expect(createRes.status).toBe(201);
     expect(createRes.body.success).toBe(true);
-    expect(createRes.body.data.unit).toBe("centimeter");
-    expect(createRes.body.data.originalUnit).toBe("meter");
+    expect(createRes.body.data.unit).toBe('centimeter');
+    expect(createRes.body.data.originalUnit).toBe('meter');
   });
 
-  test("GET /v1/api/metrics (list) converts unit", async () => {
+  test('GET /v1/api/metrics (list) converts unit', async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
@@ -172,18 +170,18 @@ describe("HTTP integration: metrics routes", () => {
 
     const app = createApp({ metricController });
 
-    await request(app).post("/v1/api/metrics").send({
-      userId: "550e8400-e29b-41d4-a716-446655440001",
-      type: "distance",
+    await request(app).post('/v1/api/metrics').send({
+      userId: '550e8400-e29b-41d4-a716-446655440001',
+      type: 'distance',
       value: 1,
-      unit: "meter",
-      date: "2025-12-01",
+      unit: 'meter',
+      date: '2025-12-01',
     });
 
-    const res = await request(app).get("/v1/api/metrics").query({
-      userId: "550e8400-e29b-41d4-a716-446655440001",
-      type: "distance",
-      unit: "feet",
+    const res = await request(app).get('/v1/api/metrics').query({
+      userId: '550e8400-e29b-41d4-a716-446655440001',
+      type: 'distance',
+      unit: 'feet',
       page: 1,
       limit: 20,
     });
@@ -191,13 +189,13 @@ describe("HTTP integration: metrics routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toHaveLength(1);
-    expect(res.body.data[0].originalUnit).toBe("feet");
+    expect(res.body.data[0].originalUnit).toBe('feet');
     expect(res.body.data[0].originalValue).toBeCloseTo(3.2808, 3);
-    expect(res.body.data[0].unit).toBe("meter");
+    expect(res.body.data[0].unit).toBe('meter');
     expect(res.body.data[0].value).toBe(1);
   });
 
-  test("GET /v1/api/metrics/chart", async () => {
+  test('GET /v1/api/metrics/chart', async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
@@ -210,24 +208,24 @@ describe("HTTP integration: metrics routes", () => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    await request(app).post("/v1/api/metrics").send({
-      userId: "550e8400-e29b-41d4-a716-446655440001",
-      type: "temperature",
+    await request(app).post('/v1/api/metrics').send({
+      userId: '550e8400-e29b-41d4-a716-446655440001',
+      type: 'temperature',
       value: 0,
-      unit: "celsius",
+      unit: 'celsius',
       date: firstDayOfMonth,
     });
 
-    const res = await request(app).get("/v1/api/metrics/chart").query({
-      userId: "550e8400-e29b-41d4-a716-446655440001",
-      type: "temperature",
-      period: "1month",
-      unit: "fahrenheit",
+    const res = await request(app).get('/v1/api/metrics/chart').query({
+      userId: '550e8400-e29b-41d4-a716-446655440001',
+      type: 'temperature',
+      period: '1month',
+      unit: 'fahrenheit',
     });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.type).toBe("temperature");
-    expect(res.body.unit).toBe("fahrenheit");
+    expect(res.body.type).toBe('temperature');
+    expect(res.body.unit).toBe('fahrenheit');
   });
 });

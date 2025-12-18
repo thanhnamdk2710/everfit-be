@@ -1,15 +1,15 @@
-import { Request, Response, NextFunction } from "express";
-import Joi from "joi";
+import type { Request, Response, NextFunction } from 'express';
+import type Joi from 'joi';
 
-import { logger } from "../../../infrastructure/logger";
+import { logger } from '../../../infrastructure/logger';
 
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;
   public readonly isOperational: boolean;
-  public readonly details?: any[];
+  public readonly details?: Array<{ field: string; message: string }>;
 
-  constructor(message: string, statusCode = 500, code = "INTERNAL_ERROR") {
+  constructor(message: string, statusCode = 500, code = 'INTERNAL_ERROR') {
     super(message);
     this.statusCode = statusCode;
     this.code = code;
@@ -20,35 +20,33 @@ export class AppError extends Error {
 }
 
 export class NotFoundError extends AppError {
-  constructor(message = "Resource not found") {
-    super(message, 404, "NOT_FOUND");
+  constructor(message = 'Resource not found') {
+    super(message, 404, 'NOT_FOUND');
   }
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string, details: any[] = []) {
-    super(message, 400, "VALIDATION_ERROR");
-    (this as any).details = details;
+  public override readonly details: Array<{ field: string; message: string }>;
+
+  constructor(message: string, details: Array<{ field: string; message: string }> = []) {
+    super(message, 400, 'VALIDATION_ERROR');
+    this.details = details;
   }
 }
 
 export class BadRequestError extends AppError {
-  constructor(message = "Bad request") {
-    super(message, 400, "BAD_REQUEST");
+  constructor(message = 'Bad request') {
+    super(message, 400, 'BAD_REQUEST');
   }
 }
 
 // Type for request property
-type RequestProperty = "body" | "query" | "params";
+type RequestProperty = 'body' | 'query' | 'params';
 
 // Validation middleware factory
-export const validate = (
-  schema: Joi.ObjectSchema,
-  property: RequestProperty = "body"
-) => {
+export const validate = (schema: Joi.ObjectSchema, property: RequestProperty = 'body') => {
   return (req: Request, _res: Response, next: NextFunction): void => {
-    const dataToValidate =
-      property === "query" ? { ...req.query, ...req.params } : req[property];
+    const dataToValidate = property === 'query' ? { ...req.query, ...req.params } : req[property];
 
     const { error, value } = schema.validate(dataToValidate, {
       abortEarly: false,
@@ -57,19 +55,19 @@ export const validate = (
 
     if (error) {
       const details = error.details.map((detail) => ({
-        field: detail.path.join("."),
+        field: detail.path.join('.'),
         message: detail.message,
       }));
 
-      next(new ValidationError("Validation failed", details));
+      next(new ValidationError('Validation failed', details));
       return;
     }
 
     // Replace with validated/sanitized values
-    if (property === "query") {
+    if (property === 'query') {
       req.query = value;
     } else {
-      (req as any)[property] = value;
+      Object.assign(req, { [property]: value });
     }
 
     next();
@@ -90,24 +88,24 @@ export const errorHandler = (
     path: req.path,
     error: err.message,
     code: (err as AppError).code,
-    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   };
 
   if ((err as AppError).isOperational) {
-    logger.warn(logContext, "Operational error");
+    logger.warn(logContext, 'Operational error');
   } else {
-    logger.error(logContext, "Unexpected error");
+    logger.error(logContext, 'Unexpected error');
   }
 
   // Handle Joi validation errors
-  if ((err as any).isJoi) {
+  if ('isJoi' in err && err.isJoi) {
     res.status(400).json({
       success: false,
       error: {
-        code: "VALIDATION_ERROR",
-        message: "Validation failed",
-        details: (err as any).details.map((d: any) => ({
-          field: d.path.join("."),
+        code: 'VALIDATION_ERROR',
+        message: 'Validation failed',
+        details: (err as Joi.ValidationError).details.map((d) => ({
+          field: d.path.join('.'),
           message: d.message,
         })),
       },
@@ -133,11 +131,8 @@ export const errorHandler = (
   res.status(500).json({
     success: false,
     error: {
-      code: "INTERNAL_ERROR",
-      message:
-        process.env.NODE_ENV === "production"
-          ? "An unexpected error occurred"
-          : err.message,
+      code: 'INTERNAL_ERROR',
+      message: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message,
     },
   });
 };
@@ -147,7 +142,7 @@ export const notFoundHandler = (req: Request, res: Response): void => {
   res.status(404).json({
     success: false,
     error: {
-      code: "NOT_FOUND",
+      code: 'NOT_FOUND',
       message: `Route ${req.method} ${req.path} not found`,
     },
   });

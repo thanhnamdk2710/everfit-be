@@ -1,5 +1,5 @@
-import { Metric } from "../entities/Metric";
-import { MetricType, MetricFilters } from "../../types";
+import type { Metric } from '../entities/Metric';
+import type { MetricType, MetricFilters } from '../../types';
 
 export interface FindByUserIdResult {
   data: Metric[];
@@ -8,14 +8,6 @@ export interface FindByUserIdResult {
 
 export interface IMetricRepository {
   save(metric: Metric): Promise<Metric>;
-  findByUserId(
-    userId: string,
-    filters?: MetricFilters
-  ): Promise<FindByUserIdResult>;
-  getChartData(
-    userId: string,
-    type: MetricType,
-    startDate: Date,
-    endDate: Date
-  ): Promise<Metric[]>;
+  findByUserId(userId: string, filters?: MetricFilters): Promise<FindByUserIdResult>;
+  getChartData(userId: string, type: MetricType, startDate: Date, endDate: Date): Promise<Metric[]>;
 }

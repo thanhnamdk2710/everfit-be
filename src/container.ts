@@ -1,14 +1,10 @@
-import type { Application } from "express";
+import type { Application } from 'express';
 
-import { createApp } from "./interface/http/app";
-import { MetricController } from "./interface/http/controllers/MetricController";
-import {
-  CreateMetricUseCase,
-  GetChartDataUseCase,
-  ListMetricsUseCase,
-} from "./application";
-import { IMetricRepository } from "./domain";
-import { PostgresMetricRepository } from "./infrastructure";
+import { createApp } from './interface/http/app';
+import { MetricController } from './interface/http/controllers/MetricController';
+import { CreateMetricUseCase, GetChartDataUseCase, ListMetricsUseCase } from './application';
+import type { IMetricRepository } from './domain';
+import { PostgresMetricRepository } from './infrastructure';
 
 export interface AppContainer {
   metricRepository: IMetricRepository;

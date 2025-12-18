@@ -1,11 +1,11 @@
 // Metric Types
-export type MetricType = "distance" | "temperature";
+export type MetricType = 'distance' | 'temperature';
 
 // Distance Units
-export type DistanceUnit = "meter" | "centimeter" | "inch" | "feet" | "yard";
+export type DistanceUnit = 'meter' | 'centimeter' | 'inch' | 'feet' | 'yard';
 
 // Temperature Units
-export type TemperatureUnit = "celsius" | "fahrenheit" | "kelvin";
+export type TemperatureUnit = 'celsius' | 'fahrenheit' | 'kelvin';
 
 // Database Row Types
 export interface MetricRow {
@@ -44,7 +44,7 @@ export interface MetricFilters {
 }
 
 // Chart Period
-export type ChartPeriod = "1month" | "2month";
+export type ChartPeriod = '1month' | '2month';
 
 // Unit Conversion Config
 export interface UnitConfig {

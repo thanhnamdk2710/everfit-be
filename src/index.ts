@@ -1,13 +1,13 @@
-import "dotenv/config";
+import 'dotenv/config';
 
-import { database, validateEnv, logger } from "./infrastructure";
-import { createContainer } from "./container";
+import { database, validateEnv, logger } from './infrastructure';
+import { createContainer } from './container';
 
 async function bootstrap(): Promise<void> {
   try {
     // Validate environment variables first
     const config = validateEnv();
-    logger.info({ env: config.nodeEnv }, "Configuration validated");
+    logger.info({ env: config.nodeEnv }, 'Configuration validated');
 
     // Connect to database
     await database.connect();
@@ -16,36 +16,33 @@ async function bootstrap(): Promise<void> {
 
     // Start server
     const server = app.listen(config.port, () => {
-      logger.info(
-        { port: config.port, env: config.nodeEnv },
-        "Metrics API Server started"
-      );
+      logger.info({ port: config.port, env: config.nodeEnv }, 'Metrics API Server started');
     });
 
     // Graceful shutdown
     const shutdown = async (signal: string): Promise<void> => {
-      logger.info({ signal }, "Shutting down gracefully...");
+      logger.info({ signal }, 'Shutting down gracefully...');
 
       server.close(async () => {
-        logger.info("HTTP server closed");
+        logger.info('HTTP server closed');
 
         await database.disconnect();
-        logger.info("Database connection closed");
+        logger.info('Database connection closed');
 
         process.exit(0);
       });
 
       // Force shutdown after 10 seconds
       setTimeout(() => {
-        logger.error("Forcing shutdown...");
+        logger.error('Forcing shutdown...');
         process.exit(1);
       }, 10000);
     };
 
-    process.on("SIGTERM", () => shutdown("SIGTERM"));
-    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
   } catch (error) {
-    logger.fatal({ error }, "Failed to start server");
+    logger.fatal({ error }, 'Failed to start server');
     process.exit(1);
   }
 }

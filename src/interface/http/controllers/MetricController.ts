@@ -1,16 +1,13 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from 'express';
 
-import {
+import type {
   CreateMetricUseCase,
   ListMetricsUseCase,
   GetChartDataUseCase,
-} from "../../../application";
-import {
-  CreateMetricDTO,
-  ListMetricsDTO,
-  ChartDataDTO,
-} from "../../../application/dto/MetricDTO";
-import { BadRequestError } from "../middlewares/errorHandler";
+} from '../../../application';
+import type { ListMetricsInput, ChartDataInput } from '../../../application/dto/MetricDTO';
+import { CreateMetricDTO, ListMetricsDTO, ChartDataDTO } from '../../../application/dto/MetricDTO';
+import { BadRequestError } from '../middlewares/errorHandler';
 
 export interface MetricControllerDependencies {
   createMetricUseCase: CreateMetricUseCase;
@@ -50,7 +47,7 @@ export class MetricController {
 
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const dto = new ListMetricsDTO(req.query as any);
+      const dto = new ListMetricsDTO(req.query as unknown as ListMetricsInput);
       const result = await this._listMetricsUseCase.execute(dto);
 
       res.status(200).json({
@@ -62,13 +59,9 @@ export class MetricController {
     }
   }
 
-  async getChartData(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async getChartData(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const dto = new ChartDataDTO(req.query as any);
+      const dto = new ChartDataDTO(req.query as unknown as ChartDataInput);
       const result = await this._getChartDataUseCase.execute(dto);
 
       res.status(200).json({

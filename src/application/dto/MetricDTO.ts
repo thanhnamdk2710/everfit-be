@@ -1,4 +1,4 @@
-import { MetricType, ChartPeriod } from '../../types';
+import type { MetricType, ChartPeriod } from '../../types';
 
 // Input DTOs
 export interface CreateMetricInput {

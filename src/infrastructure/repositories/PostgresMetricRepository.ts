@@ -1,6 +1,7 @@
-import { Metric, IMetricRepository, FindByUserIdResult } from "../../domain";
-import { MetricType, MetricFilters, MetricRow } from "../../types";
-import { database } from "../database";
+import type { IMetricRepository, FindByUserIdResult } from '../../domain';
+import { Metric } from '../../domain';
+import type { MetricType, MetricFilters, MetricRow } from '../../types';
+import { database } from '../database';
 
 export class PostgresMetricRepository implements IMetricRepository {
   async save(metric: Metric): Promise<Metric> {
@@ -28,12 +29,9 @@ export class PostgresMetricRepository implements IMetricRepository {
     return Metric.fromDatabase(result.rows[0]);
   }
 
-  async findByUserId(
-    userId: string,
-    filters: MetricFilters = {}
-  ): Promise<FindByUserIdResult> {
-    const conditions: string[] = ["user_id = $1"];
-    const values: any[] = [userId];
+  async findByUserId(userId: string, filters: MetricFilters = {}): Promise<FindByUserIdResult> {
+    const conditions: string[] = ['user_id = $1'];
+    const values: (string | number | Date | null)[] = [userId];
     let paramIndex = 2;
 
     if (filters.type) {
@@ -54,14 +52,11 @@ export class PostgresMetricRepository implements IMetricRepository {
       paramIndex++;
     }
 
-    const whereClause = conditions.join(" AND ");
+    const whereClause = conditions.join(' AND ');
 
     // Get total count
     const countQuery = `SELECT COUNT(*) FROM metrics WHERE ${whereClause}`;
-    const countResult = await database.query<{ count: string }>(
-      countQuery,
-      values
-    );
+    const countResult = await database.query<{ count: string }>(countQuery, values);
     const total = parseInt(countResult.rows[0].count, 10);
 
     // Get paginated data
@@ -75,11 +70,7 @@ export class PostgresMetricRepository implements IMetricRepository {
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
-    const dataResult = await database.query<MetricRow>(dataQuery, [
-      ...values,
-      limit,
-      offset,
-    ]);
+    const dataResult = await database.query<MetricRow>(dataQuery, [...values, limit, offset]);
     const data = dataResult.rows.map((row) => Metric.fromDatabase(row));
 
     return { data, total };
@@ -102,12 +93,7 @@ export class PostgresMetricRepository implements IMetricRepository {
       ORDER BY date, created_at DESC
     `;
 
-    const result = await database.query<MetricRow>(query, [
-      userId,
-      type,
-      startDate,
-      endDate,
-    ]);
+    const result = await database.query<MetricRow>(query, [userId, type, startDate, endDate]);
     return result.rows.map((row) => Metric.fromDatabase(row));
   }
 }
