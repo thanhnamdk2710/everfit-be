@@ -2,13 +2,16 @@ import express, { Application, Request, Response } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
-import morgan from "morgan";
+import pinoHttp from "pino-http";
 import swaggerUi from "swagger-ui-express";
 
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler";
+import { requestIdMiddleware } from "./middlewares/requestId";
+import { createRateLimiter } from "./middlewares/rateLimiter";
 import { createMetricRoutes } from "./routes/metricRoutes";
 import { MetricController } from "./controllers/MetricController";
 import { swaggerSpec } from "./swagger";
+import { logger } from "../../infrastructure/logger";
 
 export interface AppDependencies {
   metricController: MetricController;
@@ -24,10 +27,16 @@ export const createApp = (dependencies: AppDependencies): Application => {
   // Compression
   app.use(compression());
 
-  // Request logging
+  // Request ID middleware
+  app.use(requestIdMiddleware);
+
+  // Request logging with pino
   if (process.env.NODE_ENV !== "test") {
-    app.use(morgan("combined"));
+    app.use(pinoHttp({ logger }));
   }
+
+  // Rate limiting
+  app.use(createRateLimiter());
 
   // Body parsing
   app.use(express.json({ limit: "10kb" }));
@@ -56,8 +65,8 @@ export const createApp = (dependencies: AppDependencies): Application => {
       version: "1.0.0",
       description: "Metrics tracking with unit conversion",
       endpoints: {
-        metrics: "/api/metrics",
-        chart: "/api/metrics/chart",
+        metrics: "/v1/api/metrics",
+        chart: "/v1/api/metrics/chart",
         health: "/health",
       },
       supportedUnits: {
@@ -68,7 +77,7 @@ export const createApp = (dependencies: AppDependencies): Application => {
   });
 
   // API routes
-  app.use("/api/metrics", createMetricRoutes(dependencies.metricController));
+  app.use("/v1/api/metrics", createMetricRoutes(dependencies.metricController));
 
   // 404 handler
   app.use(notFoundHandler);

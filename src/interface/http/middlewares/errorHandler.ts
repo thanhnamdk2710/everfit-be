@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import Joi from "joi";
 
+import { logger } from "../../../infrastructure/logger";
+
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;
@@ -77,16 +79,25 @@ export const validate = (
 // Global error handler
 export const errorHandler = (
   err: Error | AppError,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void => {
-  // Log error
-  console.error("Error111:", {
-    message: err.message,
+  // Log error with request context
+  const logContext = {
+    requestId: req.id,
+    method: req.method,
+    path: req.path,
+    error: err.message,
     code: (err as AppError).code,
     stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-  });
+  };
+
+  if ((err as AppError).isOperational) {
+    logger.warn(logContext, "Operational error");
+  } else {
+    logger.error(logContext, "Unexpected error");
+  }
 
   // Handle Joi validation errors
   if ((err as any).isJoi) {

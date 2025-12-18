@@ -30,7 +30,6 @@ export const createContainer = (): AppContainer => {
     createMetricUseCase,
     listMetricsUseCase,
     getChartDataUseCase,
-    metricRepository,
   });
 
   const app = createApp({ metricController });

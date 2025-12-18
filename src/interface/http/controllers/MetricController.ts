@@ -10,14 +10,12 @@ import {
   ListMetricsDTO,
   ChartDataDTO,
 } from "../../../application/dto/MetricDTO";
-import { IMetricRepository } from "../../../domain";
 import { BadRequestError } from "../middlewares/errorHandler";
 
 export interface MetricControllerDependencies {
   createMetricUseCase: CreateMetricUseCase;
   listMetricsUseCase: ListMetricsUseCase;
   getChartDataUseCase: GetChartDataUseCase;
-  metricRepository: IMetricRepository;
 }
 
 export class MetricController {

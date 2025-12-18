@@ -1,4 +1,6 @@
 import { Pool, QueryResult, PoolConfig, QueryResultRow } from "pg";
+import { getConfig } from "../config";
+import { logger } from "../logger";
 
 export class Database {
   private pool: Pool | null = null;
@@ -6,16 +8,19 @@ export class Database {
   async connect(): Promise<Pool> {
     if (this.pool) return this.pool;
 
+    const appConfig = getConfig();
+
     const config: PoolConfig = {
-      host: process.env.DB_HOST || "localhost",
-      port: parseInt(process.env.DB_PORT || "5432", 10),
-      database: process.env.DB_NAME || "metrics_db",
-      user: process.env.DB_USER || "postgres",
-      password: process.env.DB_PASSWORD || "postgres123",
-      min: parseInt(process.env.DB_POOL_MIN || "2", 10),
-      max: parseInt(process.env.DB_POOL_MAX || "10", 10),
+      host: appConfig.db.host,
+      port: appConfig.db.port,
+      database: appConfig.db.name,
+      user: appConfig.db.user,
+      password: appConfig.db.password,
+      min: appConfig.db.poolMin,
+      max: appConfig.db.poolMax,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
+      ssl: true,
     };
 
     this.pool = new Pool(config);
@@ -23,17 +28,20 @@ export class Database {
     // Test connection
     try {
       const client = await this.pool.connect();
-      console.log("Database connected successfully");
+      logger.info(
+        { host: config.host, database: config.database },
+        "Database connected successfully"
+      );
       client.release();
     } catch (error) {
       const err = error as Error;
-      console.error("Database connection failed:", err.message);
+      logger.error({ error: err.message }, "Database connection failed");
       throw error;
     }
 
     // Handle pool errors
     this.pool.on("error", (err: Error) => {
-      console.error("Unexpected database error:", err);
+      logger.error({ error: err.message }, "Unexpected database error");
     });
 
     return this.pool;
@@ -43,7 +51,7 @@ export class Database {
     if (this.pool) {
       await this.pool.end();
       this.pool = null;
-      console.log("Database disconnected");
+      logger.info("Database disconnected");
     }
   }
 
@@ -60,21 +68,25 @@ export class Database {
       const result = await this.pool.query<T>(text, params);
       const duration = Date.now() - start;
 
-      if (process.env.LOG_LEVEL === "debug") {
-        console.log("Query executed:", {
-          text: text.substring(0, 100),
+      logger.debug(
+        {
+          query: text.substring(0, 100),
           duration: `${duration}ms`,
           rows: result.rowCount,
-        });
-      }
+        },
+        "Query executed"
+      );
 
       return result;
     } catch (error) {
       const err = error as Error;
-      console.error("Query error:", {
-        text: text.substring(0, 100),
-        error: err.message,
-      });
+      logger.error(
+        {
+          query: text.substring(0, 100),
+          error: err.message,
+        },
+        "Query error"
+      );
       throw error;
     }
   }

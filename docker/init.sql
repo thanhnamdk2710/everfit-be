@@ -30,5 +30,3 @@ $$ language 'plpgsql';
 -- Trigger to auto-update updated_at
 CREATE TRIGGER update_metrics_updated_at BEFORE
 UPDATE ON metrics FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
--- Insert sample data for testing
-DELETE FROM metrics;

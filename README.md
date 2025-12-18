@@ -1,18 +1,13 @@
-# Metrics API (TypeScript)
+# Metrics API
 
-A metrics tracking REST API with unit conversion support, built with **TypeScript**, **Express.js**, **PostgreSQL** following **Clean Architecture** principles.
+A metrics tracking API with unit conversion support, built with **TypeScript**, **Express.js**, **PostgreSQL** following **Clean Architecture** principles.
 
 ## Features
 
-- ✅ Track distance and temperature metrics
-- ✅ Unit conversion (metric/imperial systems)
-- ✅ Chart data aggregation (latest per day)
-- ✅ Pagination and filtering
-- ✅ **Full TypeScript support with strict typing**
-- ✅ Clean Architecture with proper separation of concerns
-- ✅ Docker support for development and production
-- ✅ Input validation with Joi
-- ✅ Comprehensive error handling
+- Track distance and temperature metrics
+- Unit conversion (metric/imperial systems)
+- Chart data aggregation (latest per day)
+- Pagination and filtering
 
 ## Architecture
 
@@ -104,7 +99,7 @@ POST /api/metrics
 Content-Type: application/json
 
 {
-  "userId": "550e8400-e29b-41d4-a716-446655440001",
+  "userId": "userId-uuid",
   "type": "distance",
   "value": 5.5,
   "unit": "kilometer",
@@ -178,18 +173,6 @@ GET /api/metrics/chart?userId=550e8400-...&type=distance&period=1month&unit=kilo
 }
 ```
 
-### Get Metric by ID
-
-```bash
-GET /api/metrics/:id
-```
-
-### Delete Metric
-
-```bash
-DELETE /api/metrics/:id
-```
-
 ## Supported Units
 
 ### Distance
@@ -198,11 +181,9 @@ DELETE /api/metrics/:id
 | ---------- | ------ | ------------ |
 | meter      | m      | 1            |
 | centimeter | cm     | 0.01         |
-| kilometer  | km     | 1000         |
 | inch       | in     | 0.0254       |
 | feet       | ft     | 0.3048       |
 | yard       | yd     | 0.9144       |
-| mile       | mi     | 1609.344     |
 
 ### Temperature
 
@@ -249,52 +230,3 @@ npm test -- --coverage
 | `npm test`          | Run all tests                          |
 | `npm run typecheck` | Type checking without emit             |
 | `npm run lint`      | Run ESLint                             |
-
-## Environment Variables
-
-| Variable    | Default     | Description          |
-| ----------- | ----------- | -------------------- |
-| NODE_ENV    | development | Environment mode     |
-| PORT        | 8000        | Server port          |
-| DB_HOST     | localhost   | PostgreSQL host      |
-| DB_PORT     | 5432        | PostgreSQL port      |
-| DB_NAME     | metrics_db  | Database name        |
-| DB_USER     | postgres    | Database user        |
-| DB_PASSWORD | postgres123 | Database password    |
-| DB_POOL_MIN | 2           | Min pool connections |
-| DB_POOL_MAX | 10          | Max pool connections |
-| LOG_LEVEL   | debug       | Logging level        |
-
-## Error Response Format
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Validation failed",
-    "details": [
-      {
-        "field": "value",
-        "message": "value must be a number"
-      }
-    ]
-  }
-}
-```
-
-## Health Check
-
-```bash
-GET /health
-
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:00:00.000Z",
-  "uptime": 3600
-}
-```
-
-## License
-
-MIT

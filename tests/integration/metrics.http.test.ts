@@ -94,7 +94,6 @@ describe("HTTP integration: metrics routes", () => {
       createMetricUseCase: new CreateMetricUseCase(repo),
       listMetricsUseCase: new ListMetricsUseCase(repo),
       getChartDataUseCase: new GetChartDataUseCase(repo),
-      metricRepository: repo,
     });
 
     const app = createApp({ metricController });
@@ -104,13 +103,12 @@ describe("HTTP integration: metrics routes", () => {
     expect(res.body.status).toBe("healthy");
   });
 
-  test("GET /api", async () => {
+  test("GET api", async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
       listMetricsUseCase: new ListMetricsUseCase(repo),
       getChartDataUseCase: new GetChartDataUseCase(repo),
-      metricRepository: repo,
     });
 
     const app = createApp({ metricController });
@@ -122,18 +120,17 @@ describe("HTTP integration: metrics routes", () => {
     expect(res.body.supportedUnits.temperature).toContain("celsius");
   });
 
-  test("POST /api/metrics - validation error", async () => {
+  test("POST /v1/api/metrics - validation error", async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
       listMetricsUseCase: new ListMetricsUseCase(repo),
       getChartDataUseCase: new GetChartDataUseCase(repo),
-      metricRepository: repo,
     });
 
     const app = createApp({ metricController });
 
-    const res = await request(app).post("/api/metrics").send({});
+    const res = await request(app).post("/v1/api/metrics").send({});
 
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
@@ -141,18 +138,17 @@ describe("HTTP integration: metrics routes", () => {
     expect(Array.isArray(res.body.error.details)).toBe(true);
   });
 
-  test("POST /api/metrics", async () => {
+  test("POST /v1/api/metrics", async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
       listMetricsUseCase: new ListMetricsUseCase(repo),
       getChartDataUseCase: new GetChartDataUseCase(repo),
-      metricRepository: repo,
     });
 
     const app = createApp({ metricController });
 
-    const createRes = await request(app).post("/api/metrics").send({
+    const createRes = await request(app).post("/v1/api/metrics").send({
       userId: "550e8400-e29b-41d4-a716-446655440001",
       type: "distance",
       value: 100,
@@ -166,18 +162,17 @@ describe("HTTP integration: metrics routes", () => {
     expect(createRes.body.data.originalUnit).toBe("meter");
   });
 
-  test("GET /api/metrics (list) converts unit", async () => {
+  test("GET /v1/api/metrics (list) converts unit", async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
       listMetricsUseCase: new ListMetricsUseCase(repo),
       getChartDataUseCase: new GetChartDataUseCase(repo),
-      metricRepository: repo,
     });
 
     const app = createApp({ metricController });
 
-    await request(app).post("/api/metrics").send({
+    await request(app).post("/v1/api/metrics").send({
       userId: "550e8400-e29b-41d4-a716-446655440001",
       type: "distance",
       value: 1,
@@ -185,7 +180,7 @@ describe("HTTP integration: metrics routes", () => {
       date: "2025-12-01",
     });
 
-    const res = await request(app).get("/api/metrics").query({
+    const res = await request(app).get("/v1/api/metrics").query({
       userId: "550e8400-e29b-41d4-a716-446655440001",
       type: "distance",
       unit: "feet",
@@ -202,13 +197,12 @@ describe("HTTP integration: metrics routes", () => {
     expect(res.body.data[0].value).toBe(1);
   });
 
-  test("GET /api/metrics/chart", async () => {
+  test("GET /v1/api/metrics/chart", async () => {
     const repo = new InMemoryMetricRepository();
     const metricController = new MetricController({
       createMetricUseCase: new CreateMetricUseCase(repo),
       listMetricsUseCase: new ListMetricsUseCase(repo),
       getChartDataUseCase: new GetChartDataUseCase(repo),
-      metricRepository: repo,
     });
 
     const app = createApp({ metricController });
@@ -216,7 +210,7 @@ describe("HTTP integration: metrics routes", () => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    await request(app).post("/api/metrics").send({
+    await request(app).post("/v1/api/metrics").send({
       userId: "550e8400-e29b-41d4-a716-446655440001",
       type: "temperature",
       value: 0,
@@ -224,7 +218,7 @@ describe("HTTP integration: metrics routes", () => {
       date: firstDayOfMonth,
     });
 
-    const res = await request(app).get("/api/metrics/chart").query({
+    const res = await request(app).get("/v1/api/metrics/chart").query({
       userId: "550e8400-e29b-41d4-a716-446655440001",
       type: "temperature",
       period: "1month",
