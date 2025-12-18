@@ -90,6 +90,18 @@ npm run dev
 npm start
 ```
 
+## API Documentation (Swagger)
+
+Interactive API documentation is available via Swagger UI:
+
+- **Local:** http://localhost:8000/api-docs
+- **Production:** https://domain.app/api-docs
+
+You can also access the OpenAPI JSON spec at:
+- `/api-docs.json`
+
+![Swagger UI](https://img.shields.io/badge/Swagger-API%20Docs-85EA2D?logo=swagger&logoColor=white)
+
 ## API Endpoints
 
 ### Create Metric
