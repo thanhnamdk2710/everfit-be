@@ -1,23 +1,31 @@
-import { Unit, IMetricRepository } from '../../domain';
-import { ChartDataDTO, ChartPointDTO, ChartDataResponseDTO } from '../dto/MetricDTO';
+import { Unit, IMetricRepository } from "../../domain";
+import {
+  ChartDataDTO,
+  ChartPointDTO,
+  ChartDataResponseDTO,
+} from "../dto/MetricDTO";
 
 export class GetChartDataUseCase {
   constructor(private readonly metricRepository: IMetricRepository) {}
 
   async execute(dto: ChartDataDTO): Promise<ChartDataResponseDTO> {
     // Validate type
-    if (!dto.type || !['distance', 'temperature'].includes(dto.type)) {
-      throw new Error('Type is required and must be "distance" or "temperature"');
+    if (!dto.type || !["distance", "temperature"].includes(dto.type)) {
+      throw new Error(
+        'Type is required and must be "distance" or "temperature"'
+      );
     }
 
     // Validate and set default unit
-    const defaultUnit = dto.type === 'distance' ? 'meter' : 'celsius';
+    const defaultUnit = dto.type === "distance" ? "meter" : "kelvin";
     const targetUnit = dto.unit || defaultUnit;
 
     if (!Unit.isValidUnit(dto.type, targetUnit)) {
       const validUnits = Unit.getValidUnits(dto.type);
       throw new Error(
-        `Invalid unit "${targetUnit}" for type "${dto.type}". Valid units: ${validUnits.join(', ')}`
+        `Invalid unit "${targetUnit}" for type "${
+          dto.type
+        }". Valid units: ${validUnits.join(", ")}`
       );
     }
 
@@ -36,7 +44,7 @@ export class GetChartDataUseCase {
       const convertedValue = unitConverter.fromBase(metric.baseValue);
       const dateStr =
         metric.date instanceof Date
-          ? metric.date.toISOString().split('T')[0]
+          ? metric.date.toISOString().split("T")[0]
           : metric.date;
 
       return {
@@ -47,14 +55,16 @@ export class GetChartDataUseCase {
     });
 
     // Sort by date ascending
-    chartData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    chartData.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
 
     return {
       type: dto.type,
       unit: targetUnit,
       period: dto.period,
-      startDate: dto.startDate.toISOString().split('T')[0],
-      endDate: dto.endDate.toISOString().split('T')[0],
+      startDate: dto.startDate.toISOString().split("T")[0],
+      endDate: dto.endDate.toISOString().split("T")[0],
       dataPoints: chartData.length,
       data: chartData,
     };

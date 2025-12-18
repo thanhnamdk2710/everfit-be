@@ -1,17 +1,18 @@
-import type { Config } from 'jest';
+import type { Config } from "jest";
 
 const config: Config = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/tests'],
-  testMatch: ['**/*.test.ts'],
-  moduleFileExtensions: ['ts', 'js', 'json'],
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/index.ts',
-    '!src/types/**/*.ts',
-  ],
-  coverageDirectory: 'coverage',
+  preset: "ts-jest",
+  globals: {
+    "ts-jest": {
+      tsconfig: "tsconfig.test.json",
+    },
+  },
+  testEnvironment: "node",
+  roots: ["<rootDir>/tests"],
+  testMatch: ["**/*.test.ts"],
+  moduleFileExtensions: ["ts", "js", "json"],
+  collectCoverageFrom: ["src/**/*.ts", "!src/index.ts", "!src/types/**/*.ts"],
+  coverageDirectory: "coverage",
   coverageThreshold: {
     global: {
       branches: 70,
@@ -21,10 +22,10 @@ const config: Config = {
     },
   },
   moduleNameMapper: {
-    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
-    '^@application/(.*)$': '<rootDir>/src/application/$1',
-    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
-    '^@interface/(.*)$': '<rootDir>/src/interface/$1',
+    "^@domain/(.*)$": "<rootDir>/src/domain/$1",
+    "^@application/(.*)$": "<rootDir>/src/application/$1",
+    "^@infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",
+    "^@interface/(.*)$": "<rootDir>/src/interface/$1",
   },
   verbose: true,
   testTimeout: 10000,

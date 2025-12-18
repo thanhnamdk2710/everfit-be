@@ -11,7 +11,7 @@ import {
   ChartDataDTO,
 } from "../../../application/dto/MetricDTO";
 import { IMetricRepository } from "../../../domain";
-import { NotFoundError, BadRequestError } from "../middlewares/errorHandler";
+import { BadRequestError } from "../middlewares/errorHandler";
 
 export interface MetricControllerDependencies {
   createMetricUseCase: CreateMetricUseCase;
@@ -24,18 +24,15 @@ export class MetricController {
   private readonly _createMetricUseCase: CreateMetricUseCase;
   private readonly _listMetricsUseCase: ListMetricsUseCase;
   private readonly _getChartDataUseCase: GetChartDataUseCase;
-  private readonly _metricRepository: IMetricRepository;
 
   constructor(deps: MetricControllerDependencies) {
     this._createMetricUseCase = deps.createMetricUseCase;
     this._listMetricsUseCase = deps.listMetricsUseCase;
     this._getChartDataUseCase = deps.getChartDataUseCase;
-    this._metricRepository = deps.metricRepository;
 
     // Bind methods to preserve `this` context
     this.create = this.create.bind(this);
     this.list = this.list.bind(this);
-    this.getById = this.getById.bind(this);
     this.getChartData = this.getChartData.bind(this);
   }
 
@@ -64,28 +61,6 @@ export class MetricController {
       });
     } catch (error) {
       next(new BadRequestError((error as Error).message));
-    }
-  }
-
-  async getById(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { id } = req.params;
-      const metric = await this._metricRepository.findById(id);
-
-      if (!metric) {
-        throw new NotFoundError(`Metric with id ${id} not found`);
-      }
-
-      res.status(200).json({
-        success: true,
-        data: metric.toJSON(),
-      });
-    } catch (error) {
-      next(error);
     }
   }
 

@@ -8,11 +8,7 @@ import {
 
 const DISTANCE_UNITS: Record<DistanceUnit, UnitConfig> = {
   meter: {
-    toBase: (v) => {
-      console.log(55555);
-
-      return v;
-    },
+    toBase: (v) => v,
     fromBase: (v) => v,
     symbol: "m",
   },
@@ -27,11 +23,7 @@ const DISTANCE_UNITS: Record<DistanceUnit, UnitConfig> = {
     symbol: "in",
   },
   feet: {
-    toBase: (v) => {
-      console.log(4444444);
-
-      return v * 0.3048;
-    },
+    toBase: (v) => v * 0.3048,
     fromBase: (v) => v / 0.3048,
     symbol: "ft",
   },

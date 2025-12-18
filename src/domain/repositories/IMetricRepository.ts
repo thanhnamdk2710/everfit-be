@@ -8,7 +8,6 @@ export interface FindByUserIdResult {
 
 export interface IMetricRepository {
   save(metric: Metric): Promise<Metric>;
-  findById(id: string): Promise<Metric | null>;
   findByUserId(
     userId: string,
     filters?: MetricFilters
@@ -19,5 +18,4 @@ export interface IMetricRepository {
     startDate: Date,
     endDate: Date
   ): Promise<Metric[]>;
-  update(id: string, data: Partial<Metric>): Promise<Metric | null>;
 }

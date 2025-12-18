@@ -1,13 +1,7 @@
 import "dotenv/config";
 
-import { createApp } from "./interface/http/app";
-import { database, PostgresMetricRepository } from "./infrastructure";
-import {
-  CreateMetricUseCase,
-  ListMetricsUseCase,
-  GetChartDataUseCase,
-} from "./application";
-import { MetricController } from "./interface/http/controllers/MetricController";
+import { database } from "./infrastructure";
+import { createContainer } from "./container";
 
 const PORT = parseInt(process.env.PORT || "8000", 10);
 
@@ -16,26 +10,7 @@ async function bootstrap(): Promise<void> {
     // Connect to database
     await database.connect();
 
-    // Initialize repositories
-    const metricRepository = new PostgresMetricRepository();
-
-    // Initialize use cases
-    const createMetricUseCase = new CreateMetricUseCase(metricRepository);
-    const listMetricsUseCase = new ListMetricsUseCase(metricRepository);
-    const getChartDataUseCase = new GetChartDataUseCase(metricRepository);
-
-    // Initialize controllers
-    const metricController = new MetricController({
-      createMetricUseCase,
-      listMetricsUseCase,
-      getChartDataUseCase,
-      metricRepository,
-    });
-
-    // Create Express app with dependencies
-    const app = createApp({
-      metricController,
-    });
+    const { app } = createContainer();
 
     // Start server
     const server = app.listen(PORT, () => {

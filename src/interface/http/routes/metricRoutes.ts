@@ -6,7 +6,6 @@ import {
   createMetricSchema,
   listMetricsSchema,
   chartDataSchema,
-  idParamSchema,
 } from "../validators/metricValidator";
 
 export const createMetricRoutes = (
@@ -40,16 +39,6 @@ export const createMetricRoutes = (
     "/chart",
     validate(chartDataSchema, "query"),
     metricController.getChartData
-  );
-
-  /**
-   * @route   GET /api/metrics/:id
-   * @desc    Get metric by ID
-   */
-  router.get(
-    "/:id",
-    validate(idParamSchema, "params"),
-    metricController.getById
   );
 
   return router;

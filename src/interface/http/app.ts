@@ -3,10 +3,12 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler";
 import { createMetricRoutes } from "./routes/metricRoutes";
 import { MetricController } from "./controllers/MetricController";
+import { swaggerSpec } from "./swagger";
 
 export interface AppDependencies {
   metricController: MetricController;
@@ -38,6 +40,13 @@ export const createApp = (dependencies: AppDependencies): Application => {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
     });
+  });
+
+  // Swagger documentation
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get("/api-docs.json", (_req: Request, res: Response) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(swaggerSpec);
   });
 
   // API info endpoint
